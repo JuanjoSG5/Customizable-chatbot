@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+
 const Chatbot = () => {
   const [messages, setMessages] = useState([
     { role: 'system', content: 'You are a helpful assistant.' }
@@ -19,13 +20,12 @@ const Chatbot = () => {
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer YOUR_OPENROUTER_API_KEY',
-          'HTTP-Referer': 'https://your-site.com',
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_TOKEN}`,
           'X-Title': 'ChatbotApp',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'openai/gpt-4o',
+          model: 'google/gemini-flash-1.5',
           messages: newMessages,
         }),
       });
