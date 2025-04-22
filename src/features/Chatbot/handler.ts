@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { setupRag as setUpRag } from '@/src/features/Chatbot/rag_setup';
+import { setupRag as setUpRag } from '@/src/features/Chatbot/create_rag';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
