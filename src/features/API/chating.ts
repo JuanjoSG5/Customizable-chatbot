@@ -2,7 +2,7 @@
 import { pipeline } from '@xenova/transformers';
 import { retrieve } from '@/src/utils/embeddings';
 
-export default async function handler(req, res) {
+export default async function sendQuestion(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -11,6 +11,7 @@ export default async function handler(req, res) {
   
   try {
     // Get documents from your API or database
+    // FIXME this has to be changed since the docs will be added before deployment 
     const docsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/documents`);
     const docs = await docsResponse.json();
     

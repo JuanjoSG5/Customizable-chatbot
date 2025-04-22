@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { pipeline } from '@xenova/transformers';
-import { retrieve } from '@/src/utils/embeddings';
+import { setupRag } from '../features/API/rag_setup';
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -8,20 +7,26 @@ const Chatbot = () => {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [docs, setDocs] = useState([]);// Cargar documentos al iniciar
+  const [docs, setDocs] = useState([]);
 
   useEffect(() => {
-    const fetchDocs = async () => {
+    const initializeRag = async () => {
       try {
-        const response = await fetch('/api/documents');
-        const docsData = await response.json();
-        setDocs(docsData);
+        const response = await fetch('/api/setup-rag');
+        const data = await response.json();
+        if (data.success) {
+          console.log('RAG setup successful');
+          // If there's document data to store:
+          if (data.data) {
+            setDocs(data.data);
+          }
+        }
       } catch (error) {
-        console.error('Error fetching documents:', error);
+        console.error('Failed to initialize RAG:', error);
       }
     };
     
-    fetchDocs();
+    initializeRag();
   }, []);
 
   const handleSend = async () => {
@@ -34,9 +39,9 @@ const Chatbot = () => {
   
 	try {
 	  const res = await fetch('/api/chat', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ question: input })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: input })
 	  });
 	  const data = await res.json();
 	  
