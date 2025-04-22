@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { setupRag } from '../features/API/rag_setup';
+import { setupRag } from '../features/Chatbot/rag_setup';
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
