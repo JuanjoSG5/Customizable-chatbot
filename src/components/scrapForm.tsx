@@ -1,5 +1,5 @@
-// React component
 import { useState } from "react";
+import styles from '@/src/styles/components/ScraperForm.module.css';   
 
 const ScraperForm = () => {
   const [url, setUrl] = useState("");
@@ -27,16 +27,25 @@ const ScraperForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="Enter URL to scrape"
-      />
-      <button disabled={loading} type="submit">Scrape and Save</button>
-      <p>
-        {message} {error}
-      </p>
+    <form onSubmit={handleSubmit} className={styles.scraperForm}>
+      <h2 className={styles.formTitle}>Add Content to Knowledge Base</h2>
+      <div className={styles.formGroup}>
+        <input
+          className={styles.inputField}
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="Enter URL to scrape"
+        />
+        <button 
+          className={styles.submitButton}
+          disabled={loading} 
+          type="submit"
+        >
+          {loading ? "Processing..." : "Scrape and Save"}
+        </button>
+      </div>
+      {message && <p className={`${styles.message} ${styles.success}`}>{message}</p>}
+      {error && <p className={`${styles.message} ${styles.error}`}>{error}</p>}
     </form>
   );
 };

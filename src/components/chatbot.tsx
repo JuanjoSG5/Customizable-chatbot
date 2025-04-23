@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import styles from "@/src/styles/components/Chatbot.module.css"; // Adjust the path as necessary
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -41,20 +42,15 @@ const Chatbot = () => {
       });
       const data = await res.json();
 
-      // Check if we received a reply and properly format it
       if (data.reply) {
-        // Make sure the reply is in the expected format
         const assistantMessage = {
           role: data.reply.role || "assistant", 
           content: data.reply.content || String(data.reply)
         };
         
         setMessages([...newMessages, assistantMessage]);
-        
-        // Debug the received message
         console.log("Received message:", data.reply);
       } else {
-        // Add an error message if no reply was received
         setMessages([
           ...newMessages, 
           { role: "assistant", content: "Sorry, I couldn't process your request." }
@@ -63,7 +59,6 @@ const Chatbot = () => {
       }
     } catch (err) {
       console.error("Error fetching reply:", err);
-      // Add an error message on exception
       setMessages([
         ...newMessages, 
         { role: "assistant", content: "An error occurred. Please try again." }
@@ -74,19 +69,26 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="chatbot">
-      <div className="messages">
+    <div className={styles.chatbot}>
+      <div className={styles.chatTitle}>AI Assistant</div>
+      <div className={styles.messages}>
         {messages
           .filter((msg) => msg.role !== "system")
           .map((msg, idx) => (
-            <div key={idx} className={`message ${msg.role}`}>
-              <strong>{msg.role}:</strong> {msg.content}
+            <div key={idx} className={`${styles.message} ${styles[msg.role]}`}>
+              {msg.content}
             </div>
           ))}
+        {loading && (
+          <div className={styles.loading}>
+            Thinking...
+          </div>
+        )}
       </div>
 
-      <div className="input-area">
+      <div className={styles.inputArea}>
         <input
+          className={styles.inputField}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -94,8 +96,12 @@ const Chatbot = () => {
           placeholder={isSetupComplete ? "Type your message..." : "Setting up RAG..."}
           disabled={!isSetupComplete || loading}
         />
-        <button onClick={handleSend} disabled={!isSetupComplete || loading}>
-          {loading ? "Sending..." : "Send"}
+        <button 
+          className={styles.sendButton}
+          onClick={handleSend} 
+          disabled={!isSetupComplete || loading}
+        >
+          {loading ? "..." : "Send"}
         </button>
       </div>
     </div>
