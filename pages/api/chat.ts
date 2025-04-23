@@ -11,12 +11,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const { question } = req.body;
+
   
   try {
     // Get documents from database
     const { data: docs, error: docsError } = await supabase
       .from("documents")
       .select("*");
+
     
     if (docsError) throw docsError;
     
@@ -29,11 +31,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const topDocs = retrieve(docs, queryEmb);
     const contextText = topDocs.map(d => `Source [${d.id}]:\n${d.text}`).join('\n\n');
     
+
     // Call OpenRouter API
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_TOKEN}`,
         'X-Title': 'ChatbotApp',
         'Content-Type': 'application/json',
       },
@@ -47,11 +50,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     
     const data = await response.json();
-    const reply = data.choices?.[0]?.message;
-    
+
+    console.log("Response from OpenRouter:", data);
+
+    const reply = data.choices?.[0]?.message || {
+        role: "assistant",
+        content: "I couldn't find an answer based on the provided context."
+      };
     res.status(200).json({ reply });
   } catch (error) {
     console.error('Error processing chat:', error);
-    res.status(500).json({ error: 'Failed to process chat request' });
+    res.status(500).json({ 
+        reply: {
+          role: "assistant",
+          content: "Sorry, an error occurred while processing your request."
+        }
+      });
   }
 }

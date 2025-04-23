@@ -41,11 +41,33 @@ const Chatbot = () => {
       });
       const data = await res.json();
 
+      // Check if we received a reply and properly format it
       if (data.reply) {
-        setMessages([...newMessages, data.reply]);
+        // Make sure the reply is in the expected format
+        const assistantMessage = {
+          role: data.reply.role || "assistant", 
+          content: data.reply.content || String(data.reply)
+        };
+        
+        setMessages([...newMessages, assistantMessage]);
+        
+        // Debug the received message
+        console.log("Received message:", data.reply);
+      } else {
+        // Add an error message if no reply was received
+        setMessages([
+          ...newMessages, 
+          { role: "assistant", content: "Sorry, I couldn't process your request." }
+        ]);
+        console.error("No reply received from API:", data);
       }
     } catch (err) {
       console.error("Error fetching reply:", err);
+      // Add an error message on exception
+      setMessages([
+        ...newMessages, 
+        { role: "assistant", content: "An error occurred. Please try again." }
+      ]);
     } finally {
       setLoading(false);
     }
