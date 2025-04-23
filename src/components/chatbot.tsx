@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { setupRag } from "../features/Chatbot/create_rag";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -7,8 +6,7 @@ const Chatbot = () => {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [ragChain, setRagChain] = useState(null);
-  const [model, setModel] = useState(null);
+  const [isSetupComplete, setIsSetupComplete] = useState(false);
 
   useEffect(() => {
     const initializeRag = async () => {
@@ -16,6 +14,7 @@ const Chatbot = () => {
         const response = await fetch("/api/setup_rag");
         const data = await response.json();
         if (data.success) {
+          setIsSetupComplete(true);
           console.log("RAG setup successful");
         }
       } catch (error) {
@@ -27,7 +26,7 @@ const Chatbot = () => {
   }, []);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !isSetupComplete) return;
 
     const newMessages = [...messages, { role: "user", content: input }];
     setMessages(newMessages);
@@ -70,9 +69,10 @@ const Chatbot = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Type your message..."
+          placeholder={isSetupComplete ? "Type your message..." : "Setting up RAG..."}
+          disabled={!isSetupComplete || loading}
         />
-        <button onClick={handleSend} disabled={loading}>
+        <button onClick={handleSend} disabled={!isSetupComplete || loading}>
           {loading ? "Sending..." : "Send"}
         </button>
       </div>
