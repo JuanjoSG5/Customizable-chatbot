@@ -65,6 +65,12 @@ NEXT_PUBLIC_DATABASE_KEY=your_supabase_key
 
 3. Use the chatbot interface to ask questions about the content
 
+## TODO (Open to changes)
+
+- Change the style to a darker tone
+- Add a history
+
+
 ## License
 
 AFL-3.0
