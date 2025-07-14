@@ -67,10 +67,8 @@ NEXT_PUBLIC_DATABASE_KEY=your_supabase_key
 
 3. Use the chatbot interface to ask questions about the content
 
-## License
+## TODO (Open to changes)
 
-AFL-3.0
-
-## Author
-
-Juan Jose Sanchez Gonzalez
+- Change the style to a darker tone
+- Add a history
+- Create a version that is easy to implement in other projects
