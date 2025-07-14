@@ -70,5 +70,3 @@ NEXT_PUBLIC_DATABASE_KEY=your_supabase_key
 ## TODO (Open to changes)
 
 - Change the style to a darker tone
-- Add a history
-- Create a version that is easy to implement in other projects
