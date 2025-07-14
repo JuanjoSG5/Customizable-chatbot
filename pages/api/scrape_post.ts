@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { crawlUrl } from '@/src/utils/clawler';
+import { crawlUrl } from '@/src/utils/crawler';
 
 const supabase = createClient(`${process.env.NEXT_PUBLIC_DATABASE}`, `${process.env.NEXT_PUBLIC_DATABASE_KEY}`)
 

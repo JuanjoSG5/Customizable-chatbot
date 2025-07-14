@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "@/src/styles/components/ScraperForm.module.css";
+import CustomInput from "@/src/components/input";
 
 const ScraperForm = () => {
   const [url, setUrl] = useState("");
@@ -28,48 +28,26 @@ const ScraperForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.scraperForm}>
-      <h2 className={styles.formTitle}>Add Content to Knowledge Base</h2>
-      <div className={styles.formGroup}>
-        <div className={styles.inputContainer}>
-          <label htmlFor="urlInput" className={styles.inputLabel}>
-            Website URL
-          </label>
-          <input
-            id="urlInput"
-            className={styles.inputField}
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Enter URL to scrape"
-          />
-        </div>
+    <form className="flex flex-col flex-wrap content-center " onSubmit={handleSubmit} >
+      <h2 className="text-2xl font-semibold my-4">Add Content to Knowledge Base</h2>
+      <div className="flex flex-col items-center">
+        <CustomInput id="urlInput" text="Website URL" value={url} setValue={setUrl} />
 
-        <div className={styles.inputContainer}>
-          <label htmlFor="depthInput" className={styles.inputLabel}>
-            Crawl Depth
-          </label>
-          <input
-            id="depthInput"
-            className={styles.inputField}
-            type="number"
-            value={depth}
-            onChange={(e) => setDepth(Number(e.target.value))}
-            placeholder="Enter depth (default: 10)"
-          />
-        </div>
+        <CustomInput id="depthInput" text="Crawl Depth" value={depth} setValue={setDepth} />
 
         <button
-          className={styles.submitButton}
           disabled={loading}
+          className="bg-blue-500 text-white px-4 py-2 rounded-3xl w-64 hover:bg-blue-600 disabled:opacity-50"
           type="submit"
         >
           {loading ? "Processing..." : "Scrape and Save"}
         </button>
       </div>
       {message && (
-        <p className={`${styles.message} ${styles.success}`}>{message}</p>
+        <p className="mt-4 p-3 w-64 bg-green-100 border border-green-400 text-green-700 rounded-full text-center self-center">{message}</p>
       )}
-      {error && <p className={`${styles.message} ${styles.error}`}>{error}</p>}
+      {error && <p className="mt-4 p-3 w-64 bg-red-100 border border-red-400 text-red-700 rounded-full text-center self-center">{error}</p>}
+
     </form>
   );
 };

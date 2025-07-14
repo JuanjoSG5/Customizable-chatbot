@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import styles from "@/src/styles/components/Chatbot.module.css"; // Adjust the path as necessary
+import Chat from "@/src/components/chat";
+import TextBox from "@/src/components/textBox";
+import CloseIcon from "./icons/closeIcon";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -8,6 +10,7 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSetupComplete, setIsSetupComplete] = useState(false);
+  const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
     const initializeRag = async () => {
@@ -25,6 +28,10 @@ const Chatbot = () => {
 
     initializeRag();
   }, []);
+
+  const onClick = () => {
+    setHidden(!hidden);
+  };
 
   const handleSend = async () => {
     if (!input.trim() || !isSetupComplete) return;
@@ -44,24 +51,27 @@ const Chatbot = () => {
 
       if (data.reply) {
         const assistantMessage = {
-          role: data.reply.role || "assistant", 
-          content: data.reply.content || String(data.reply)
+          role: data.reply.role || "assistant",
+          content: data.reply.content || String(data.reply),
         };
-        
+
         setMessages([...newMessages, assistantMessage]);
         console.log("Received message:", data.reply);
       } else {
         setMessages([
-          ...newMessages, 
-          { role: "assistant", content: "Sorry, I couldn't process your request." }
+          ...newMessages,
+          {
+            role: "assistant",
+            content: "Sorry, I couldn't process your request.",
+          },
         ]);
         console.error("No reply received from API:", data);
       }
     } catch (err) {
       console.error("Error fetching reply:", err);
       setMessages([
-        ...newMessages, 
-        { role: "assistant", content: "An error occurred. Please try again." }
+        ...newMessages,
+        { role: "assistant", content: "An error occurred. Please try again." },
       ]);
     } finally {
       setLoading(false);
@@ -69,42 +79,34 @@ const Chatbot = () => {
   };
 
   return (
-    <div className={styles.chatbot}>
-      <div className={styles.chatTitle}>AI Assistant</div>
-      <div className={styles.messages}>
-        {messages
-          .filter((msg) => msg.role !== "system")
-          .map((msg, idx) => (
-            <div key={idx} className={`${styles.message} ${styles[msg.role]}`}>
-              {msg.content}
-            </div>
-          ))}
-        {loading && (
-          <div className={styles.loading}>
-            Thinking...
+    <>
+      {!hidden ? (
+        <div className="fixed bottom-4 right-4 flex flex-col gap-2 p-4 w-[350px] h-[525px] bg-white border border-gray-300 rounded-lg shadow-lg">
+          <div className="flex justify-between items-center text-2xl">
+            AI Assistant
+            <span>
+              <CloseIcon onClick={onClick} />
+            </span>
           </div>
-        )}
-      </div>
+          <Chat messages={messages} loading={loading} />
 
-      <div className={styles.inputArea}>
-        <input
-          className={styles.inputField}
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder={isSetupComplete ? "Type your message..." : "Setting up RAG..."}
-          disabled={!isSetupComplete || loading}
-        />
-        <button 
-          className={styles.sendButton}
-          onClick={handleSend} 
-          disabled={!isSetupComplete || loading}
+          <TextBox
+            input={input}
+            setInput={setInput}
+            handleSend={handleSend}
+            isSetupComplete={isSetupComplete}
+            loading={loading}
+          />
+        </div>
+      ) : (
+        <button
+          onClick={onClick}
+          className="fixed z-[1000] bottom-[3vh] right-[3vw]"
         >
-          {loading ? "..." : "Send"}
+          <img className="size-18" src="logo.png" alt="Chat with the AI" />
         </button>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

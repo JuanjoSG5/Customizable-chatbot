@@ -3,10 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { MarkdownTextSplitter } from "langchain/text_splitter";
 import { pipeline } from "@xenova/transformers";
 
-// Add debugging logs to check environment variables
-console.log("Database URL defined:", !!process.env.NEXT_PUBLIC_DATABASE);
-console.log("Database key defined:", !!process.env.NEXT_PUBLIC_DATABASE_KEY);
-
 const supabase = createClient(
   `${process.env.NEXT_PUBLIC_DATABASE}`,
   `${process.env.NEXT_PUBLIC_DATABASE_KEY}`
@@ -18,7 +14,7 @@ export default async function setup_rag(
 ) {
   try {
     console.log("RAG setup started");
-    
+  
     // Get the markdown content
     console.log("Fetching markdown from Supabase...");
     const { data, error } = await supabase
@@ -30,6 +26,7 @@ export default async function setup_rag(
 
     if (error) {
       console.error("Supabase fetch error:", error);
+      console.log("DATA::", data);
       throw error;
     }
     
@@ -110,12 +107,16 @@ export default async function setup_rag(
         console.error("Supabase insert error:", insertError);
         throw insertError;
       }
-
+      
       console.log("RAG setup completed successfully");
       res.status(200).json({ success: true });
     } catch (pipelineError) {
       console.error("Pipeline error:", pipelineError);
-      throw pipelineError;
+      res.status(500).json({ 
+        success: false, 
+        error: pipelineError instanceof Error ? pipelineError.message : "Pipeline processing failed" 
+      });
+      return; 
     }
   } catch (error) {
     console.error("Error in RAG setup:", error);
