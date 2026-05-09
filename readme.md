@@ -43,7 +43,7 @@ The pipeline is designed to be efficient and modular:
 
 - **Frontend & API:** Next.js (App Router), React, TypeScript, TailwindCSS.
 - **AI Orchestration:** `LangChain.js`.
-- **Data Ingestion:** `Firecrawl` API.
+- **Data Ingestion:** `Jina Reader` .
 - **Embeddings:** `@xenova/transformers`.
 - **Vector Database:** `Supabase` + `pgvector`.
 - **LLM Provider:** OpenRouter / Gemini API.
@@ -65,7 +65,6 @@ Follow these steps to run the project locally.
 ### 1. Prerequisites
 - Node.js 18+ and `npm` / `pnpm`
 - A Supabase project with the `pgvector` extension enabled.
-- API Keys for Firecrawl and your chosen LLM provider (OpenRouter/Gemini).
 
 ### 2. Environment Variables
 Clone the repository and create a `.env` file in the root directory:
@@ -76,7 +75,6 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # AI & Scraping Keys
-FIRECRAWL_API_KEY=your_firecrawl_api_key
 OPENROUTER_API_KEY=your_openrouter_key
 ```
 
