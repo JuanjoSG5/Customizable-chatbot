@@ -1,6 +1,6 @@
 import Chatbot from "@/src/components/chatbot";
 import ScraperForm from "@/src/components/scrapForm";
-import Layout from "@/src/components/layout";
+import Layout from "@/src/layout/layout";
 
 export default function Home() {
   return (
