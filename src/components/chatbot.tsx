@@ -18,6 +18,15 @@ const Chatbot = () => {
     const initializeRag = async () => {
       try {
         const response = await fetch("/api/setup_rag");
+
+        // Debug logs
+        if (!response.ok) {
+          const errorText = await response.text(); 
+          console.error("Error del servidor (HTML):", errorText);
+          throw new Error(`Error en el servidor: ${response.status}`);
+        }
+
+
         const data = await response.json();
         if (data.success) {
           setIsSetupComplete(true);

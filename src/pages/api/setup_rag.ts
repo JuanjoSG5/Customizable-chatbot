@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { MarkdownTextSplitter } from "@langchain/textsplitters";
-import { pipeline } from "@xenova/transformers";
+import { pipeline } from "@huggingface/transformers";
 import { supabase } from "@/src/utils/supabase";
 import { Doc } from "@/src/types/doc";
 

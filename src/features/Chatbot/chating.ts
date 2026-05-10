@@ -1,4 +1,4 @@
-import { pipeline } from '@xenova/transformers';
+import { pipeline } from '@huggingface/transformers';
 import { retrieve } from '@/src/utils/embeddings'; // Asegúrate de que la ruta es correcta
 
 export default async function sendQuestion(req, res) {

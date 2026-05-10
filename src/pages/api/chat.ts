@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { pipeline } from "@xenova/transformers";
+import { pipeline } from "@huggingface/transformers";
 import { supabase } from "@/src/utils/supabase";
 import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from "@langchain/core/prompts";
