@@ -10,12 +10,16 @@ export default async function setup_rag(
 ) {
   try {
     console.log("RAG setup started");
+
+    const { chatId } = req.body;
+    if (!chatId) return res.status(400).json({ error: 'chatId is required' });
   
 
     // We check if the index has been built
     const { count, error: countError } = await supabase
       .from("documents")
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('chat_id', chatId);
 
     // if it has we stop the process to build it
     if (count && count > 0) {
@@ -28,6 +32,7 @@ export default async function setup_rag(
     const { data, error } = await supabase
       .from("articles")
       .select("markdown")
+      .eq('chat_id', chatId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(); // Using maybe single since the database more than likely will be empty at some point
@@ -101,6 +106,7 @@ export default async function setup_rag(
             content: doc.pageContent, 
             metadata: { chunk: i },   
             embedding: embedding,
+            chat_id: chatId
           });
         } catch (chunkError) {
           console.error(`Error processing chunk ${i}:`, chunkError);

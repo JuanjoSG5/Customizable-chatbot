@@ -83,42 +83,37 @@ Run the following SQL in your Supabase SQL Editor to prepare the vector store:
 ```sql
 create extension if not exists vector;
 
--- 1. Creamos la tabla de workspaces
-create table workspaces (
+create table chats (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
--- 2. Creamos la tabla documents con su workspace_id
 create table documents (
   id bigserial primary key,
   content text,
   metadata jsonb,
   embedding vector(384),
-  workspace_id uuid references workspaces(id) on delete cascade
+  chat_id uuid references chats(id) on delete cascade
 );
 
--- 3. Creamos la tabla articles 
 create table articles (
   id bigserial primary key,
   markdown text,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
--- 4. Creamos la tabla chat_history
 create table chat_history (
   id bigserial primary key,
   role text not null, 
   content text not null,
   created_at timestamp with time zone default timezone('utc'::text, now()),
-  workspace_id uuid references workspaces(id) on delete cascade 
+  chat_id uuid references chats(id) on delete cascade 
 );
 
--- 5. Creamos la función de búsqueda
 create or replace function match_documents (
   query_embedding vector(384),
-  p_workspace_id uuid,          
+  p_chat_id uuid,          
   match_count int default 4     
 ) returns table (
   id bigint,
@@ -136,7 +131,7 @@ begin
     documents.metadata,
     1 - (documents.embedding <=> query_embedding) as similarity
   from documents
-  where documents.workspace_id = p_workspace_id -- FILTRO CLAVE
+  where documents.chat_id = p_chat_id 
   order by documents.embedding <=> query_embedding
   limit match_count;
 end;

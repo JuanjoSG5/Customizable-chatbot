@@ -3,4 +3,5 @@ export interface Doc {
   content: string;
   metadata: Record<string, unknown>;
   embedding: number[];
+  chat_id: string;
 }

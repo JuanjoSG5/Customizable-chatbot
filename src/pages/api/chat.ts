@@ -14,14 +14,15 @@ const SUPABASE_MATCH_COUNT = 3; // Selects the n more relevant chunks from the d
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { question } = req.body;
-  if (!question) return res.status(400).json({ error: 'Question is required' });
+  const { question, chatId } = req.body;
+  if (!question || !chatId) return res.status(400).json({ error: 'Question and chatId are required' });
 
   try {
     // 1. Recover the previous chat memory
     const { data: historyData } = await supabase
       .from('chat_history')
       .select('role, content')
+      .eq('chat_id', chatId)
       .order('created_at', { ascending: false })
       .limit(HISTORY_LIMIT);
 
@@ -39,7 +40,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Search most relevant chunks
     const { data: documents, error: searchError } = await supabase.rpc('match_documents', {
       query_embedding: queryEmbedding,
-      match_count: SUPABASE_MATCH_COUNT
+      match_count: SUPABASE_MATCH_COUNT,
+      p_chat_id: chatId
     });
 
     if (searchError) throw searchError;
@@ -113,8 +115,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
       await supabase.from('chat_history').insert([
-        { role: 'user', content: question },
-        { role: 'assistant', content: streamedResponse}
+        { role: 'user', content: question, chat_id: chatId },
+        { role: 'assistant', content: streamedResponse, chat_id: chatId }
       ]);
 
       res.end();

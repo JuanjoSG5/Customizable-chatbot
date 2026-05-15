@@ -1,8 +1,11 @@
 import Chatbot from "@/src/components/chatbot";
 import ScraperForm from "@/src/components/scrapForm";
 import Layout from "@/src/layout/layout";
+import { useState } from "react";
 
 export default function Home() {
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+
   return (
     <Layout>
       <div className="mb-8">

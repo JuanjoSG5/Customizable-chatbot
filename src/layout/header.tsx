@@ -1,13 +1,10 @@
 import Link from "next/link";
 import ThemeToggle from "../components/themeToggle";
-import Sidebar from "./sidebar";
 
 export default function Header() {
   return (
     <header className="w-full bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        
-        <Sidebar/>
 
         {/* Título y Logo */}
         <div className="text-center md:text-left">

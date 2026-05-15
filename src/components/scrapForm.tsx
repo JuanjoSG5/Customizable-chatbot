@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomInput from "@/src/components/input";
+import { supabase } from "../utils/supabase";
 
 const ScraperForm = () => {
   const [url, setUrl] = useState("");
@@ -7,22 +8,53 @@ const ScraperForm = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedId = localStorage.getItem('current_chat_id');
+    if (savedId) {
+      console.log("Found existing chat ID in localStorage:", savedId);
+      setActiveChatId(savedId);
+    }
+  }, []);
+
+  const generateChatId = async () => {
+    const { data, error } = await supabase
+      .from('chats')
+      .insert({ name: `Nuevo Chat ${new Date().toLocaleTimeString()}` })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error creando el chat:", error);
+      return;
+    }
+
+    setActiveChatId(data.id);
+    localStorage.setItem('current_chat_id', data.id);
+    return data.id;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setMessage("Iniciando...");
+    let chatId = activeChatId;
+
+    if (!chatId) {
+      chatId = await generateChatId();
+    }
 
     try {
       const res = await fetch("/api/scrape_post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, depth }),
+        body: JSON.stringify({ url, depth, chatId }),
       });
 
       if (!res.ok) {
-        throw new Error("Error en la petición HTTP al servidor");
+        throw new Error("Error en la petición HTTP al servidor", { cause: await res.text() });
       }
 
       if (!res.body) {

@@ -7,7 +7,11 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Cache-Control', 'no-cache'); 
     res.setHeader('Connection', 'keep-alive'); 
 
-    const { url, depth } = req.body; 
+    const { url, depth, chatId } = req.body; 
+
+    if (!url || !depth || !chatId) {
+        return res.status(400).json({ message: "Missing url, depth or chatId in request body" });
+    }
 
     // This is the event to send progress updates to the client
     const sendEvent = (type: string, data: any) => {
@@ -34,7 +38,7 @@ export default async function handler(req: any, res: any) {
 
       console.log(`Markdown text extracted, length: ${markdownText.length} characters.`);
 
-      const { error } = await supabase.from("articles").insert({ markdown: markdownText });
+      const { error } = await supabase.from("articles").insert({ markdown: markdownText, chat_id: chatId });
       
       if (error) {
           console.error("Error inserting in Supabase:", error);
