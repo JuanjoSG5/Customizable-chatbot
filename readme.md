@@ -100,6 +100,7 @@ create table documents (
 create table articles (
   id bigserial primary key,
   markdown text,
+  chat_id uuid references chats(id) on delete cascade,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
@@ -107,8 +108,8 @@ create table chat_history (
   id bigserial primary key,
   role text not null, 
   content text not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()),
-  chat_id uuid references chats(id) on delete cascade 
+  chat_id uuid references chats(id) on delete cascade,
+  created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
 create or replace function match_documents (
