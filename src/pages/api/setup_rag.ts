@@ -11,7 +11,9 @@ export default async function setup_rag(
   try {
     console.log("RAG setup started");
 
-    const { chatId } = req.body;
+    
+    const chatId = (req.query.chatId || req.body.chatId) as string;
+
     if (!chatId) return res.status(400).json({ error: 'chatId is required' });
   
 

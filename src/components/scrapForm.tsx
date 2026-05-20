@@ -1,56 +1,51 @@
 import { useEffect, useState } from "react";
 import CustomInput from "@/src/components/input";
 import { supabase } from "../utils/supabase";
+import { useRouter } from "next/router";
+import { createNewChat } from "../features/chats/create_chat";
 
-const ScraperForm = () => {
+// Using String or null here so that once the form is submitted and we dont have the id
+// we can generate a new one and pass it to the chatbot component
+const ScraperForm = ({
+  chatId,
+  isOpen,
+  setIsOpen
+}: {
+  chatId: string | null,
+  isOpen: boolean,
+  setIsOpen: (isOpen: boolean) => void
+}) => {
+  const router = useRouter();
   const [url, setUrl] = useState("");
   const [depth, setDepth] = useState(10);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const savedId = localStorage.getItem('current_chat_id');
-    if (savedId) {
-      console.log("Found existing chat ID in localStorage:", savedId);
-      setActiveChatId(savedId);
-    }
+    setMounted(true);
   }, []);
 
-  const generateChatId = async () => {
-    const { data, error } = await supabase
-      .from('chats')
-      .insert({ name: `Nuevo Chat ${new Date().toLocaleTimeString()}` })
-      .select()
-      .single();
-    
-    if (error) {
-      console.error("Error creando el chat:", error);
-      return;
-    }
-
-    setActiveChatId(data.id);
-    localStorage.setItem('current_chat_id', data.id);
-    return data.id;
-  }
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setMessage("Iniciando...");
-    let chatId = activeChatId;
+    setMessage("Creating new chat...");
 
-    if (!chatId) {
-      chatId = await generateChatId();
-    }
+    let currentChatId = chatId;
+    let isNewChat = false;
 
     try {
+      if (!currentChatId) {
+        currentChatId = await createNewChat();
+        isNewChat = true;
+      }
+
       const res = await fetch("/api/scrape_post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, depth, chatId }),
+        body: JSON.stringify({ url, depth, chatId: currentChatId }),
       });
 
       if (!res.ok) {
@@ -58,46 +53,52 @@ const ScraperForm = () => {
       }
 
       if (!res.body) {
-        throw new Error("Response body is empty");  
+        throw new Error("Response body is empty");
       }
-      
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = ""; 
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) break;
-        
+
         buffer += decoder.decode(value, { stream: true });
 
         const lines = buffer.split('\n');
-        
-        buffer = lines.pop() ?? ""; 
+        buffer = lines.pop() ?? "";
 
         for (let line of lines) {
-          if (!line.trim()) continue; 
-
+          if (!line.trim()) continue;
           if (line.startsWith("data:")) {
             line = line.substring(5).trim();
           }
-          
+
           try {
             const data = JSON.parse(line);
-            
+
             // Update the UI dynamically with the current URL being scraped
-            if (data.type === "progress") {
-              setMessage(data.message);
-            } else if (data.type === "done") {
-              setMessage(data.message);
-            } else if (data.type === "error") {
-              setError(data.message);
+            switch (data.type) {
+              case "progress":
+                setMessage(data.message);
+                break;
+              case "done":
+                setMessage(data.message);
+                break;
+              case "error":
+                setError(data.message);
+                break;
             }
           } catch (parseError) {
             console.error("Failed to parse JSON chunk:", line, parseError);
           }
         }
+      }
+
+      if (isNewChat && currentChatId) {
+        router.push(`/chat/${currentChatId}`);
       }
     } catch (err) {
       setError(err.message || "Fallo inesperado");
@@ -107,16 +108,21 @@ const ScraperForm = () => {
     }
   };
 
+  if (!mounted) return null;
+
   return (
-    <form 
-      className="flex flex-col bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors duration-300" 
+    <form
+      className="flex flex-col bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors duration-300"
       onSubmit={handleSubmit}
     >
+      <button type="button" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? "Cerrar" : "Abrir"}
+      </button>
       <h2 className="text-2xl font-semibold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-3">
         <span className="bg-blue-600 text-white w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold shadow-md">1</span>
         Train your AI Assistant
       </h2>
-      
+
       <div className="flex flex-col gap-5">
         <CustomInput id="urlInput" text="Website URL" value={url} setValue={setUrl} />
         <CustomInput id="depthInput" text="Crawl Depth" value={depth} setValue={setDepth} />

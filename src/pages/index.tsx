@@ -1,29 +1,40 @@
-import Chatbot from "@/src/components/chatbot";
-import ScraperForm from "@/src/components/scrapForm";
 import Layout from "@/src/layout/layout";
+import Link from "next/link";
+import { supabase } from "@/src/utils/supabase";
+import { useRouter } from "next/router";
 import { useState } from "react";
+import ScraperForm from "../components/scrapForm";
+import { createNewChat } from "../features/chats/create_chat";
 
 export default function Home() {
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleCreate = async () => {
+    setLoading(true);
+    try {
+      const newId = await createNewChat();
+      router.push(`/u/${newId}`);
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <Layout>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-          Data Ingestion
-        </h2>
-        <p className="text-slate-600 dark:text-slate-400 mt-2">
-          Train your assistant by providing a website to scrape and index.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <div className="w-full">
-          <ScraperForm />
-        </div>
-        <div className="w-full">
-          <Chatbot />
-        </div>
+      <div className="flex flex-col items-center justify-center h-screen space-y-4">
+        <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
+          Welcome to AI Knowledge Base
+        </h1>
+        <button
+          onClick={handleCreate}
+          disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          {loading ? "Creating..." : "Create New Chat"}
+        </button>
       </div>
     </Layout>
   );

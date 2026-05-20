@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react"
 
-export default function Sidebar() {
-    const [isOpen, setIsOpen] = useState(false)
-    const [chatList, setChatList] = useState([])
+export default function ChatHistory({ 
+    isOpen,
+        setIsOpen 
+}: { 
+    isOpen: boolean, 
+    setIsOpen: (isOpen: boolean) => void 
+}) {
     const [mounted, setMounted] = useState(false)
+    const [chats, setChats] = useState([])
     
     useEffect(() => {
         setMounted(true)
@@ -12,7 +17,7 @@ export default function Sidebar() {
     if (!mounted) return <div className="w-16" /> 
 
     return (
-        <div className={isOpen ? "w-64" : "w-16"}>
+        <div className={isOpen ? "w-64 transition-all duration-300" : "w-16 transition-all duration-300"}>
             <button onClick={() => setIsOpen(!isOpen)}>
                 {isOpen ? "Cerrar" : "Abrir"}
             </button>
@@ -20,7 +25,7 @@ export default function Sidebar() {
                 Nuevo Chat
             </button>
             <p>Lista de chats:</p>
-            {/* Aquí irá tu mapeo de workspaces luego */}
+            {/* Maping of the chats here */}
         </div>
     )
 

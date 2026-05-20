@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Chat from "@/src/components/chat";
 import TextBox from "@/src/components/textBox";
 
-const Chatbot = () => {
+const Chatbot = ({ chatId }: { chatId: string }) => {
  const[messages, setMessages] = useState([
     { 
       role: "assistant", 
@@ -17,7 +17,7 @@ const Chatbot = () => {
   useEffect(() => {
     const initializeRag = async () => {
       try {
-        const response = await fetch("/api/setup_rag");
+        const response = await fetch(`/api/setup_rag?chatId=${chatId}`);
 
         // Debug logs
         if (!response.ok) {
