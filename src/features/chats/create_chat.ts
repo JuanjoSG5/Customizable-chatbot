@@ -8,5 +8,5 @@ export const createNewChat = async () => {
     .single();
 
   if (error) throw error;
-  return data.id; // Devuelve solo el ID
+  return data.id; 
 };

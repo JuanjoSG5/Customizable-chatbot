@@ -1,18 +1,35 @@
 import React, { useEffect, useState } from "react"
+import { loadChats } from "../features/chats/load_chats"
+import router from "next/router"
 
 export default function ChatHistory({ 
     isOpen,
-        setIsOpen 
+    setIsOpen 
 }: { 
     isOpen: boolean, 
     setIsOpen: (isOpen: boolean) => void 
 }) {
     const [mounted, setMounted] = useState(false)
-    const [chats, setChats] = useState([])
+    const [chats, setChats] = useState<Chat[]>([])
     
     useEffect(() => {
-        setMounted(true)
+        const loadChatsData = async () => {
+            setMounted(true)
+            try {
+                const chatsData = await loadChats()
+                console.log("Chats cargados:", chatsData)
+                setChats(chatsData || [])
+            } catch (error) {
+                console.error("Error al cargar los chats:", error)
+            }
+        }
+        loadChatsData()
     }, [])
+
+    const handleChatClick = (chatId: string) => {
+        console.log("Chat seleccionado:", chatId)
+        router.push(`/u/${chatId}`);
+    }
 
     if (!mounted) return <div className="w-16" /> 
 
@@ -25,7 +42,16 @@ export default function ChatHistory({
                 Nuevo Chat
             </button>
             <p>Lista de chats:</p>
-            {/* Maping of the chats here */}
+            {
+                chats.map(chat => (
+                    <div 
+                        key={chat.id}
+                        onClick={() => handleChatClick(chat.id)}
+                    >
+                        {chat.name}
+                    </div>
+                ))
+            }
         </div>
     )
 
