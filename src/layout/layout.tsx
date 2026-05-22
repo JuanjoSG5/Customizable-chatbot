@@ -11,12 +11,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     // Cambiamos a flex-row para poner Sidebar a la izq y contenido a la der
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       
-      {
-        <ChatHistory 
-          isOpen={isChatHistoryOpen}
-          setIsOpen={setIsChatHistoryOpen}
-        />
-      }
+      
+      <ChatHistory 
+        isOpen={isChatHistoryOpen}
+        setIsOpen={setIsChatHistoryOpen}
+      />
+      
       
       
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
@@ -29,17 +29,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         
         {/* Simple footer */}
         <footer className="py-6 text-center text-sm text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800 mt-auto">
-          Built by Juan José Sánchez | AI Engineer
+          Built by Juan José Sánchez | Software Developer
         </footer>
       </div>
 
-      {
+      
         <ScraperForm 
           chatId={null}
           isOpen={isScraperFormOpen}
           setIsOpen={setIsScraperFormOpen}
         />
-      }
+      
 
     </div>
   );
