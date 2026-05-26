@@ -98,7 +98,7 @@ const ScraperForm = ({
       }
 
       if (isNewChat && currentChatId) {
-        router.push(`/chat/${currentChatId}`);
+        router.push(`/u/${currentChatId}`);
       }
     } catch (err) {
       setError(err.message || "Fallo inesperado");
@@ -111,17 +111,37 @@ const ScraperForm = ({
   if (!mounted) return null;
 
   return (
-    <form
-      className="flex flex-col bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors duration-300"
+    <aside className={`
+        flex flex-col 
+        h-screen 
+        border-l border-slate-200 
+        dark:border-slate-800 
+        bg-white 
+        dark:bg-slate-950 
+        transition-all duration-300 ease-in-out ${
+        isOpen ? "w-80" : "w-0 border-none overflow-hidden"
+      }`}
+    >
+<form
+      className="flex flex-col h-full w-80 p-6 overflow-y-auto"
       onSubmit={handleSubmit}
     >
-      <button type="button" onClick={() => setIsOpen(!isOpen)}>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="flex items-center text-2xl font-semibold text-slate-800 dark:text-slate-100 gap-3">
+          Train your AI Assistant
+        </h2>
+        <button 
+          type="button" 
+          onClick={() => setIsOpen(!isOpen)}
+          className="text-slate-400 hover:text-slate-600 dar:hover:text-slate-200"
+          title="Close scraping form"
+        >
+          {/* TODO: Add the SVG icon here */}
           {isOpen ? "Cerrar" : "Abrir"}
-      </button>
-      <h2 className="text-2xl font-semibold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-3">
-        <span className="bg-blue-600 text-white w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold shadow-md">1</span>
-        Train your AI Assistant
-      </h2>
+        </button>
+      </div>
+      
+      
 
       <div className="flex flex-col gap-5">
         <CustomInput id="urlInput" text="Website URL" value={url} setValue={setUrl} />
@@ -129,7 +149,16 @@ const ScraperForm = ({
 
         <button
           disabled={loading}
-          className="mt-4 bg-blue-600 text-white font-medium px-4 py-3 rounded-xl w-full hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 transition-all shadow-sm"
+          className="
+            w-full
+            mt-2 
+            px-4 py-3
+            bg-blue-600 
+            text-white font-medium 
+            rounded-lg
+            disabled:opacity-50 
+            transition-all active:scale-[0.98] hover:bg-blue-700 
+            shadow-sm"
           type="submit"
         >
           {loading ? "Processing..." : "Scrape and Save"}
@@ -137,16 +166,38 @@ const ScraperForm = ({
       </div>
 
       {message && (
-        <p className="mt-6 p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-xl text-center text-sm font-medium break-words">
+        <p className="
+          mt-6 p-3 
+          bg-green-50 
+          dark:bg-green-900/30 
+          border border-green-200 rounded-xl
+          dark:border-green-800 
+          text-sm text-center text-green-700 
+          font-medium
+          dark:text-green-400 
+          break-words
+        ">
           {message}
         </p>
       )}
       {error && (
-        <p className="mt-6 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl text-center text-sm font-medium break-words">
+        <p className="
+          mt-6 p-3 
+          bg-red-50 
+          dark:bg-red-900/30 
+          border border-red-200 rounded-xl 
+          dark:border-red-800 
+          text-sm text-center text-red-700 
+          font-medium
+          dark:text-red-400
+          break-words
+        ">
           {error}
         </p>
       )}
     </form>
+    </aside>
+    
   );
 };
 

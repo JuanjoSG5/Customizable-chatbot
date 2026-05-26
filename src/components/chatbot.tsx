@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import Chat from "@/src/components/chat";
 import TextBox from "@/src/components/textBox";
@@ -35,9 +33,10 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
         console.error("Failed to initialize RAG:", error);
       }
     };
-
-    initializeRag();
-  },[]);
+    if (chatId) {
+      initializeRag();
+    }
+  },[chatId]);
 
   const handleSend = async () => {
     if (!input.trim() || !isSetupComplete) return;
@@ -50,7 +49,7 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: input }),
+        body: JSON.stringify({ question: input, chatId }),
       });
 
       if (!res.ok) throw new Error("Web Error");
@@ -118,26 +117,51 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
   };
 
    return (
-    <div className="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm h-[600px] overflow-hidden transition-colors duration-300">
+    <div className="flex flex-col h-full w-full bg-white dark:bg-slate-900 transition-colors duration-300">
       
-      <div className="bg-slate-900 dark:bg-slate-950 px-6 py-4 border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+      { /* This is going to be the header of the current chat */ }
+      <div className="
+        flex 
+        items-center justify-between
+        bg-white/50 dark:bg-slate-950/50 
+        px-6 py-4 
+        border-b border-slate-100 dark:border-slate-800 
+        backdrop-blur-sm
+        z-10 
+        sticky top-0
+        transition-colors duration-300
+      ">
+        <h2 className="
+          flex 
+          items-center 
+          gap-2 
+          text-base font-semibold 
+          text-slate-800 dark:text-slate-200
+
+        ">
+          Live Assistant
+        </h2>
+        <div className="flex items-center gap-2">
           <span className="relative flex h-3 w-3">
             <span className={isSetupComplete ? "animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" : "hidden"}></span>
             <span className={`relative inline-flex rounded-full h-3 w-3 ${isSetupComplete ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
           </span>
-          Live Assistant
-        </h2>
-        <p className="text-slate-400 text-xs mt-1">
-          {isSetupComplete ? "RAG Engine Ready" : "Initializing Vector Store..."}
-        </p>
+          <p className="text-slate-400 text-xs mt-1">
+            {isSetupComplete ? "RAG Engine Ready" : "Initializing Vector Store..."}
+          </p>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 p-4 transition-colors duration-300">
+      <div className="flex-1 overflow-y-auto scroll-smoothbg-slate-50 dark:bg-slate-900/50 p-4 transition-colors duration-300">
         <Chat messages={messages} loading={loading} />
       </div>
 
-      <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-colors duration-300">
+      <div className="
+        w-full 
+        bg-gradient-to-t from-white to-transparent
+        dark:from-slate-900/50 dark:to-transparent
+        py-6 px-4
+      ">
         <TextBox
           input={input}
           setInput={setInput}

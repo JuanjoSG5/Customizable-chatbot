@@ -96,7 +96,6 @@ export default function ChatHistory({
                 )}
                 
                 {chats.map(chat => {
-                    // Verificamos si este elemento es el que está abierto en la URL
                     const isActive = chat.id === chatId;
 
                     return (
@@ -108,9 +107,7 @@ export default function ChatHistory({
                                     ? "bg-slate-800 text-white font-medium shadow-sm border border-slate-700" 
                                     : "text-slate-400 hover:bg-slate-800/40 hover:text-slate-200"
                             }`}
-                        >
-                            <span className="text-base">💬</span>
-                            
+                        >                            
                             {isOpen && (
                                 <span className="text-sm truncate w-full block">
                                     {chat.name}
