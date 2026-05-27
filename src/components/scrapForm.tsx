@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import CustomInput from "@/src/components/input";
-import { supabase } from "../utils/supabase";
 import { useRouter } from "next/router";
 import { createNewChat } from "../features/chats/create_chat";
+import CloseIcon from "./icons/closeIcon";
 
 // Using String or null here so that once the form is submitted and we dont have the id
 // we can generate a new one and pass it to the chatbot component
@@ -136,8 +136,7 @@ const ScraperForm = ({
           className="text-slate-400 hover:text-slate-600 dar:hover:text-slate-200"
           title="Close scraping form"
         >
-          {/* TODO: Add the SVG icon here */}
-          {isOpen ? "Cerrar" : "Abrir"}
+          <CloseIcon/>
         </button>
       </div>
       
