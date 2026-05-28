@@ -13,7 +13,7 @@ export default function Layout(
     chatId: string | null 
 }) {
   const [isChatHistoryOpen, setIsChatHistoryOpen] = useState(false);
-  const [isScraperFormOpen, setIsScraperFormOpen] = useState(true);
+  const [isScraperFormOpen, setIsScraperFormOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
@@ -61,7 +61,7 @@ export default function Layout(
         </main>
       </div>
       <ScraperForm
-        chatId={null}
+        chatId={chatId}
         isOpen={isScraperFormOpen}
         setIsOpen={setIsScraperFormOpen}
       />

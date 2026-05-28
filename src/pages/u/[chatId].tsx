@@ -9,7 +9,7 @@ export default function ChatPage() {
 
     if (!id) {
         return (
-            <Layout>
+            <Layout chatId={chatId as string}>
                 <div className="flex justify-center items-center h-full w-full ">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
@@ -18,7 +18,7 @@ export default function ChatPage() {
     }
 
     return (
-        <Layout>
+        <Layout chatId={id} >
             <Chatbot chatId={id} /> 
         </Layout>
     );
