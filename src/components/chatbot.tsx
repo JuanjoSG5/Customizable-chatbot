@@ -39,7 +39,7 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
   },[chatId]);
 
   const handleSend = async () => {
-    if (!input.trim() || !isSetupComplete) return;
+    if (!input.trim()) return;
 
     setMessages((prev) => [...prev, { role: "user", content: input }]);
     setInput("");
