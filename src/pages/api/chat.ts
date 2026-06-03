@@ -46,24 +46,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (searchError) throw searchError;
 
-    //  Join the found chunks to pass as context 
-    const contextText = documents ? documents.map((doc: any) => doc.content || doc.text).join("\n\n") : "";
+    const contextText = documents && documents.length > 0 
+        ? documents.map((doc: any) => doc.content || doc.text).join("\n\n") 
+        : "";
 
-    // LLM Prompt 
-    const promptTemplate = PromptTemplate.fromTemplate(`
-      You are a helpful assistant. Use the following pieces of retrieved CONTEXT and the CONVERSATION HISTORY to answer the QUESTION. 
-      If the answer is not in the context, just say that you don't know based on the provided website. 
-      Keep the answer concise.
-      
-      CONVERSATION HISTORY:
-      {history}
+    let promptTemplate;
 
-      CONTEXT: 
-      {context} 
-      
-      QUESTION: {question} 
-      ANSWER:
-    `);
+    if (contextText.trim() === "") {
+      promptTemplate = PromptTemplate.fromTemplate(`
+        Eres un asistente de IA conversacional muy útil y amigable. 
+        El usuario acaba de crear este espacio de trabajo y aún no ha subido ningún documento de contexto.
+        Responde a la PREGUNTA del usuario usando tu conocimiento general y mantén una conversación natural basada en el HISTORIAL.
+        
+        HISTORIAL DE CONVERSACIÓN:
+        {history}
+        
+        PREGUNTA: {question} 
+        RESPUESTA:
+      `);
+    } else {
+      promptTemplate = PromptTemplate.fromTemplate(`
+        Eres un asistente de IA especializado en extraer información. 
+        Usa los siguientes fragmentos de CONTEXTO recuperado y el HISTORIAL DE CONVERSACIÓN para responder a la PREGUNTA. 
+        Si la respuesta no se encuentra en el CONTEXTO, simplemente di que no tienes esa información basada en las fuentes proporcionadas, no inventes nada.
+        Mantén la respuesta concisa y clara.
+        
+        HISTORIAL DE CONVERSACIÓN:
+        {history}
+
+        CONTEXTO: 
+        {context} 
+        
+        PREGUNTA: {question} 
+        RESPUESTA:
+      `);
+    }
 
     const apiKey = process.env.NEXT_OPENROUTER_TOKEN;
     if (!apiKey) {

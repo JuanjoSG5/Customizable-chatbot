@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
 import Chat from "@/src/components/chat";
 import TextBox from "@/src/components/textBox";
+import { useRouter } from "next/router";
 
 const Chatbot = ({ chatId }: { chatId: string }) => {
- const[messages, setMessages] = useState([
-    { 
-      role: "assistant", 
-      content: "Hi! I am your AI Assistant. Once you train me with a website, you can ask me anything about it." },
+  const router = useRouter();
+  const { q } = router.query;
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content: "Hi! I am your AI Assistant. Once you train me with a website, you can ask me anything about it."
+    },
   ]);
-  const[input, setInput] = useState("");
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSetupComplete, setIsSetupComplete] = useState(false);
 
@@ -19,7 +23,7 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
 
         // Debug logs
         if (!response.ok) {
-          const errorText = await response.text(); 
+          const errorText = await response.text();
           console.error("Error del servidor (HTML):", errorText);
           throw new Error(`Error en el servidor: ${response.status}`);
         }
@@ -36,7 +40,7 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
     if (chatId) {
       initializeRag();
     }
-  },[chatId]);
+  }, [chatId]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -79,19 +83,19 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
 
               if (parsedData.text && parsedData.text !== "") {
                 if (isFirstRealChunk) {
-                   setLoading(false); 
-                   setMessages((prev) =>[...prev, { role: "assistant", content: parsedData.text }]);
-                   isFirstRealChunk = false;
+                  setLoading(false);
+                  setMessages((prev) => [...prev, { role: "assistant", content: parsedData.text }]);
+                  isFirstRealChunk = false;
                 } else {
-                   setMessages((prevMessages) => {
-                     const updatedMessages =[...prevMessages];
-                     const lastIndex = updatedMessages.length - 1;
-                     updatedMessages[lastIndex] = {
-                       ...updatedMessages[lastIndex],
-                       content: updatedMessages[lastIndex].content + parsedData.text
-                     };
-                     return updatedMessages;
-                   });
+                  setMessages((prevMessages) => {
+                    const updatedMessages = [...prevMessages];
+                    const lastIndex = updatedMessages.length - 1;
+                    updatedMessages[lastIndex] = {
+                      ...updatedMessages[lastIndex],
+                      content: updatedMessages[lastIndex].content + parsedData.text
+                    };
+                    return updatedMessages;
+                  });
                 }
               }
             } catch (e) {
@@ -100,26 +104,26 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
           }
         }
       }
-      
+
       if (isFirstRealChunk) {
-          setLoading(false);
-          setMessages((prev) =>[...prev, { role: "assistant", content: "Lo siento, el servidor no ha respondido." }]);
+        setLoading(false);
+        setMessages((prev) => [...prev, { role: "assistant", content: "Lo siento, el servidor no ha respondido." }]);
       }
 
     } catch (err) {
       console.error("Error fetching reply:", err);
-      setLoading(false); 
-      setMessages((prev) =>[
+      setLoading(false);
+      setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "Ocurrió un error. Por favor, inténtalo de nuevo." },
       ]);
     }
   };
 
-   return (
+  return (
     <div className="flex flex-col h-full w-full bg-white dark:bg-slate-900 transition-colors duration-300">
-      
-      { /* This is going to be the header of the current chat */ }
+
+      { /* This is going to be the header of the current chat */}
       <div className="
         flex 
         items-center justify-between
