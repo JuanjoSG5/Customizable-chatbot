@@ -29,7 +29,7 @@ export default function ChatSqueleton() {
                     New Chat
                 </h2>
             </div>
-            <div className="w-full bg-gradient-to-t from-white via-white to-transparent dark:from-slate-900 pt-6 pb-6 px-4">
+            <div className="w-full bg-slate-50 dark:bg-slate-900 pt-6 pb-6 px-4">
                 <div className="max-w-3xl mx-auto w-full relative">
                     <TextBox
                         input={input}
