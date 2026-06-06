@@ -13,7 +13,7 @@ export default function ChatSqueleton() {
         setIsCreatingChat(true);
         try {
             const newId = await createNewChat(input);
-            router.push(`/u/${newId}`);
+            router.push(`/u/${newId}?q=${encodeURIComponent(input)}`);
         } catch (error) {
             console.error("Error creating new chat:", error);
         } finally {

@@ -15,5 +15,13 @@ export const scrapeUrl = async (url: string, depth: number, chatId: string) => {
         throw new Error("Response body is empty");
     }
 
-    return res;
+    await res.text();
+
+    const ragResponse = await fetch(`/api/setup_rag?chatId=${chatId}`);
+    if (!ragResponse.ok) {
+        throw new Error("RAG setup failed");
+    }
+
+
+    return ragResponse;
 };

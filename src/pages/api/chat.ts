@@ -14,7 +14,7 @@ const SUPABASE_MATCH_COUNT = 3; // Selects the n more relevant chunks from the d
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { question, chatId } = req.body;
+  const { question, chatId, modelName } = req.body;
   if (!question || !chatId) return res.status(400).json({ error: 'Question and chatId are required' });
 
   try {
@@ -89,7 +89,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     
     const model = new ChatOpenAI({
-      modelName: process.env.NEXT_OPENROUTER_MODEL_NAME, 
+      // Added the option to choose the model from the frontend, but you can hardcode it here if you want
+      modelName: modelName || process.env.NEXT_OPENROUTER_MODEL_NAME,
       apiKey: apiKey,
       // If you are going to use paid models you can uncomment the line below to set a token limit,
       // since I am using a free model for testing I will leave this here

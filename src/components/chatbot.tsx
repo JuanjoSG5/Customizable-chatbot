@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Chat from "@/src/components/chat";
 import TextBox from "@/src/components/textBox";
 import { useRouter } from "next/router";
+import { send } from "node:process";
+import { readStream } from "../utils/readStream";
 
 const Chatbot = ({ chatId }: { chatId: string }) => {
   const router = useRouter();
@@ -14,93 +16,54 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSetupComplete, setIsSetupComplete] = useState(false);
+  const hasHandledInitialQuery = useRef(false);
+  // TODO: Setting this to true for testing purposes
+  const [isSetupComplete, setIsSetupComplete] = useState(true);
+
+
 
   useEffect(() => {
-    const initializeRag = async () => {
-      try {
-        const response = await fetch(`/api/setup_rag?chatId=${chatId}`);
+    if (!router.isReady || hasHandledInitialQuery.current) return;
+    
+    const queryMessage = router.query.q as string | undefined;
+    
+    if (!queryMessage) return;
 
-        // Debug logs
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Error del servidor (HTML):", errorText);
-          throw new Error(`Error en el servidor: ${response.status}`);
-        }
+    hasHandledInitialQuery.current = true;
+    sendSingleMessage(queryMessage);
+    router.replace(`/u/${chatId}`, undefined, { shallow: true });
+  }, [router.isReady, loading]);
 
 
-        const data = await response.json();
-        if (data.success) {
-          setIsSetupComplete(true);
-        }
-      } catch (error) {
-        console.error("Failed to initialize RAG:", error);
-      }
-    };
-    if (chatId) {
-      initializeRag();
-    }
-  }, [chatId]);
+  const sendSingleMessage = async (message: string) => {
+    if (!message.trim()) return;
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    setMessages((prev) => [...prev, { role: "user", content: input }]);
-    setInput("");
+    setMessages((prev) => [...prev, { role: "user", content: message }]);
     setLoading(true);
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: input, chatId }),
+        body: JSON.stringify({ question: message, chatId }),
       });
 
       if (!res.ok) throw new Error("Web Error");
       if (!res.body) throw new Error("No body");
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let buffer = "";
-      let responseFinished = false;
       let isFirstRealChunk = true;
 
-      while (!responseFinished) {
-        const { value, done } = await reader.read();
-        responseFinished = done;
-
-        if (value) {
-          buffer += decoder.decode(value, { stream: true });
-          const chunks = buffer.split("\n\n");
-          buffer = chunks.pop() || "";
-
-          for (const chunk of chunks) {
-            const dataStr = chunk.replace(/^data: /, "").trim();
-            if (!dataStr) continue;
-
-            try {
-              const parsedData = JSON.parse(dataStr);
-
-              if (parsedData.text && parsedData.text !== "") {
-                if (isFirstRealChunk) {
-                  setLoading(false);
-                  setMessages((prev) => [...prev, { role: "assistant", content: parsedData.text }]);
-                  isFirstRealChunk = false;
-                } else {
-                  setMessages((prevMessages) => {
-                    const updatedMessages = [...prevMessages];
-                    const lastIndex = updatedMessages.length - 1;
-                    updatedMessages[lastIndex] = {
-                      ...updatedMessages[lastIndex],
-                      content: updatedMessages[lastIndex].content + parsedData.text
-                    };
-                    return updatedMessages;
-                  });
-                }
-              }
-            } catch (e) {
-              console.log(e)
-            }
+      for await (const chunk of readStream(res)) {
+        if (chunk.text && chunk.text !== "") {
+          if (isFirstRealChunk) {
+            setLoading(false);
+            setMessages((prev) => [...prev, { role: "assistant", content: chunk.text }]);
+            isFirstRealChunk = false;
+          } else {
+            setMessages((prevMessages) => {
+              const updatedMessages = [...prevMessages];
+              updatedMessages[updatedMessages.length - 1].content += chunk.text;
+              return updatedMessages;
+            });
           }
         }
       }
@@ -119,6 +82,13 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
       ]);
     }
   };
+
+  const handleSend = () => {
+    if (!input.trim() || loading) return;
+    sendSingleMessage(input);
+    setInput("");
+  };
+
 
   return (
     <div className="flex flex-col h-full w-full bg-white dark:bg-slate-900 transition-colors duration-300">
@@ -156,7 +126,7 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto scroll-smoothbg-slate-50 dark:bg-slate-900/50 p-4 transition-colors duration-300">
+      <div className="flex-1 overflow-y-auto scroll-smooth bg-slate-50 dark:bg-slate-900/50 p-4 transition-colors duration-300">
         <Chat messages={messages} loading={loading} />
       </div>
 

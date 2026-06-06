@@ -22,10 +22,21 @@ const ScraperForm = ({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [modelName, setModelName] = useState("");
 
   useEffect(() => {
     setMounted(true);
+    const savedModel = localStorage.getItem("selectedModel");
+    if (savedModel) {
+      setModelName(savedModel);
+    }
   }, []);
+
+  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedModel = e.target.value;
+    setModelName(selectedModel);
+    localStorage.setItem("selectedModel", selectedModel);
+  }
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -135,7 +146,7 @@ const ScraperForm = ({
           onClick={() => setIsOpen(!isOpen)}
           className="text-slate-400 hover:text-slate-600 dar:hover:text-slate-200"
           title="Close scraping form"
-        >
+        >pai
           <CloseIcon/>
         </button>
       </div>
@@ -143,8 +154,26 @@ const ScraperForm = ({
       
 
       <div className="flex flex-col gap-5">
-        <CustomInput id="urlInput" text="Website URL" value={url} setValue={setUrl} />
-        <CustomInput id="depthInput" text="Crawl Depth" value={depth} setValue={setDepth} />
+        <CustomInput 
+          id="modelInput" 
+          text="Model Name (optional)" 
+          value={modelName} 
+          setValue={setModelName} 
+        />
+
+        <CustomInput 
+          id="urlInput" 
+          text="Website URL" 
+          value={url} 
+          setValue={setUrl} 
+        />
+        
+        <CustomInput 
+          id="depthInput" 
+          text="Crawl Depth" 
+          value={depth} 
+          setValue={setDepth} 
+        />
 
         <button
           disabled={loading}
