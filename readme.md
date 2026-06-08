@@ -83,41 +83,52 @@ Run the following SQL in your Supabase SQL Editor to prepare the vector store:
 ```sql
 create extension if not exists vector;
 
+-- Chats/Conversaciones
 create table chats (
   id uuid primary key default gen_random_uuid(),
   name text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()),
+  updated_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+--  Messages 
+create table messages (
+  id uuid primary key default gen_random_uuid(),
+  chat_id uuid not null references chats(id) on delete cascade,
+  role text not null check (role in ('user', 'assistant')),
+  content text not null,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
+--  Articles scraped in MarkedDown 
+create table articles (
+  id uuid primary key default gen_random_uuid(),
+  chat_id uuid not null references chats(id) on delete cascade,
+  markdown text not null,
+  source_url text,
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+-- Indexed documents 
 create table documents (
-  id bigserial primary key,
-  content text,
+  id uuid primary key default gen_random_uuid(),
+  chat_id uuid not null references chats(id) on delete cascade,
+  content text not null,
   metadata jsonb,
   embedding vector(384),
-  chat_id uuid references chats(id) on delete cascade
-);
-
-create table articles (
-  id bigserial primary key,
-  markdown text,
-  chat_id uuid references chats(id) on delete cascade,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
 
-create table chat_history (
-  id bigserial primary key,
-  role text not null, 
-  content text not null,
-  chat_id uuid references chats(id) on delete cascade,
-  created_at timestamp with time zone default timezone('utc'::text, now())
-);
+create index idx_messages_chat on messages(chat_id);
+create index idx_documents_chat on documents(chat_id);
+create index idx_articles_chat on articles(chat_id);
 
 create or replace function match_documents (
+  p_chat_id uuid,
   query_embedding vector(384),
-  p_chat_id uuid,          
   match_count int default 4     
 ) returns table (
-  id bigint,
+  id uuid,
   content text,
   metadata jsonb,
   similarity float
