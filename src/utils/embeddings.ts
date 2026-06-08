@@ -1,8 +1,9 @@
 import { supabase } from "@/src/utils/supabase";
 
-export async function retrieve(queryEmb: number[], k = 3) {
+export async function retrieve(queryEmb: number[], chatId: string, k = 3) {
   // Llamamos al Remote Procedure Call (RPC) de Supabase
   const { data, error } = await supabase.rpc('match_documents', {
+    p_chat_id: chatId,
     query_embedding: queryEmb,
     match_count: k
   });

@@ -4,7 +4,6 @@ import { supabase } from "@/src/utils/supabase";
 import { ChatOpenAI } from '@langchain/openai';
 import { PromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import Stream from "node:stream";
 
 
 const HISTORY_LIMIT = 6; 
@@ -20,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // 1. Recover the previous chat memory
     const { data: historyData } = await supabase
-      .from('chat_history')
+      .from('messages')
       .select('role, content')
       .eq('chat_id', chatId)
       .order('created_at', { ascending: false })
@@ -132,7 +131,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           (res as any).flush();
         }
       }
-      await supabase.from('chat_history').insert([
+      await supabase.from('messages').insert([
         { role: 'user', content: question, chat_id: chatId },
         { role: 'assistant', content: streamedResponse, chat_id: chatId }
       ]);

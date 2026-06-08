@@ -4,6 +4,7 @@ import TextBox from "@/src/components/textBox";
 import { useRouter } from "next/router";
 import { send } from "node:process";
 import { readStream } from "../utils/readStream";
+import { supabase } from "../utils/supabase";
 
 const Chatbot = ({ chatId }: { chatId: string }) => {
   const router = useRouter();
@@ -20,7 +21,7 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
   // TODO: Setting this to true for testing purposes
   const [isSetupComplete, setIsSetupComplete] = useState(true);
 
-
+  
 
   useEffect(() => {
     if (!router.isReady || hasHandledInitialQuery.current) return;
@@ -34,12 +35,42 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
     router.replace(`/u/${chatId}`, undefined, { shallow: true });
   }, [router.isReady, loading]);
 
+  // Load chat history from Supabase
+  useEffect(() => {
+    if (!chatId || !router.isReady) return;
+
+    const loadChatHistory = async () => {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('role, content')
+        .eq('chat_id', chatId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error("Error loading chat history:", error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setMessages(data);
+      }
+    };
+
+    loadChatHistory();
+  }, [chatId, router.isReady]);
+
 
   const sendSingleMessage = async (message: string) => {
     if (!message.trim()) return;
 
     setMessages((prev) => [...prev, { role: "user", content: message }]);
     setLoading(true);
+
+    await supabase
+    .from('messages')
+    .insert({ chat_id: chatId, role: 'user', content: message });
+  
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -64,6 +95,10 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
               updatedMessages[updatedMessages.length - 1].content += chunk.text;
               return updatedMessages;
             });
+
+            supabase
+              .from("chats")
+              .insert({ chat_id: chatId, role: 'assistant', content: chunk.text });
           }
         }
       }
@@ -73,6 +108,7 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
         setMessages((prev) => [...prev, { role: "assistant", content: "Lo siento, el servidor no ha respondido." }]);
       }
 
+      
     } catch (err) {
       console.error("Error fetching reply:", err);
       setLoading(false);
@@ -80,7 +116,8 @@ const Chatbot = ({ chatId }: { chatId: string }) => {
         ...prev,
         { role: "assistant", content: "Ocurrió un error. Por favor, inténtalo de nuevo." },
       ]);
-    }
+    } 
+
   };
 
   const handleSend = () => {
